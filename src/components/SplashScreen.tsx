@@ -11,9 +11,9 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
 
   useEffect(() => {
     // Sequence the animations
-    const t1 = setTimeout(() => setStage(1), 800); // Show text
-    const t2 = setTimeout(() => setStage(2), 2500); // Start fade out
-    const t3 = setTimeout(() => onComplete(), 3000); // Unmount
+    const t1 = setTimeout(() => setStage(1), 1200); // Show text
+    const t2 = setTimeout(() => setStage(2), 4500); // Start fade out
+    const t3 = setTimeout(() => onComplete(), 5000); // Unmount
 
     return () => {
       clearTimeout(t1);
