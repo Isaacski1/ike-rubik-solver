@@ -209,7 +209,7 @@ export default function CameraScanner({ onScanComplete, onCancel, initialState }
             
             // Calculate grid bounds (assume a square grid in the center of the video)
             const minDim = Math.min(canvas.width, canvas.height);
-            const gridWidth = minDim * 0.7; // Grid takes up 70% of the smallest dimension
+            const gridWidth = minDim * 0.85; // Grid takes up 85% of the smallest dimension
             const startX = (canvas.width - gridWidth) / 2;
             const startY = (canvas.height - gridWidth) / 2;
             const cellSize = gridWidth / 3;
@@ -358,58 +358,42 @@ export default function CameraScanner({ onScanComplete, onCancel, initialState }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-between">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-end overflow-hidden">
       {/* Header */}
-      <div className="w-full p-4 flex justify-between items-center text-white bg-gradient-to-b from-black/80 to-transparent absolute top-0 z-10">
+      <div className="w-full p-6 pb-20 flex justify-between items-start text-white bg-gradient-to-b from-black via-black/60 to-transparent absolute top-0 z-20">
         <div>
-          <h2 className="text-xl font-bold mb-1">Scan Face {currentFaceIndex + 1} of 6</h2>
-          <p className="text-blue-300 font-medium">Show {FACE_NAMES[currentFace]}</p>
+          <h2 className="text-xl font-black tracking-tight mb-0.5">Scan Face {currentFaceIndex + 1}</h2>
+          <p className="text-blue-400 font-bold text-sm tracking-wide uppercase">{FACE_NAMES[currentFace]}</p>
         </div>
         <button 
           onClick={() => {
             if (stream) stream.getTracks().forEach(track => track.stop());
             onCancel();
           }}
-          className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-sm"
+          className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-all border border-white/10 backdrop-blur-md active:scale-90"
         >
           <X className="w-6 h-6" />
         </button>
       </div>
 
       {/* Main Camera Area */}
-      <div className="relative w-full flex-1 flex items-center justify-center overflow-hidden">
+      <div className="relative w-full flex flex-col items-center px-4 mb-2">
         {error ? (
-          <div className="p-6 bg-red-900/50 text-red-200 border border-red-500 rounded-xl max-w-md text-center m-4">
+          <div className="p-6 bg-red-900/40 text-red-100 border border-red-500/30 rounded-2xl max-w-md text-center m-4 backdrop-blur-xl">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
-            <h3 className="text-xl font-bold text-white mb-2">Camera Unavailable</h3>
-            <p className="font-medium text-sm mb-4">{error}</p>
-            <div className="text-xs text-red-300 text-left bg-red-950/50 p-4 rounded-lg space-y-2">
-              <p><strong>Troubleshooting:</strong></p>
-              <ul className="list-disc pl-4 space-y-1">
-                <li>Make sure you allowed camera permissions when prompted.</li>
-                <li>Check your browser's site settings (usually a lock icon in the URL bar) and ensure Camera is set to "Allow".</li>
-                <li>If you are in an embedded view, click the button below to open in a new tab.</li>
-              </ul>
-            </div>
-            <div className="flex flex-col gap-3 mt-6">
-              {window.self !== window.top && (
-                <button 
-                  onClick={() => window.open(window.location.href, '_blank')}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-colors shadow-lg"
-                >
-                  Open in New Tab (Recommended)
-                </button>
-              )}
+            <h3 className="text-xl font-bold text-white mb-2 font-mono uppercase tracking-tighter">Connection Lost</h3>
+            <p className="font-medium text-sm mb-4 opacity-80">{error}</p>
+            <div className="flex flex-col gap-3 mt-4">
               <button 
                 onClick={onCancel}
-                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors"
+                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-xs uppercase tracking-widest transition-colors border border-white/10"
               >
                 Go Back
               </button>
             </div>
           </div>
         ) : (
-          <div className="relative w-full max-w-[500px] aspect-square bg-slate-900 mx-auto rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative w-full max-w-[400px] aspect-square bg-slate-900 mx-auto rounded-[2.5rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border-2 border-white/5 shrink-0">
             <video 
               ref={videoRef} 
               autoPlay 
@@ -421,77 +405,69 @@ export default function CameraScanner({ onScanComplete, onCancel, initialState }
             <canvas ref={canvasRef} className="hidden" />
 
             {/* Grid Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-[70%] aspect-square grid grid-cols-3 grid-rows-3 gap-1 p-1 bg-black/40 rounded-xl backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-6">
+              <div className="w-full aspect-square grid grid-cols-3 grid-rows-3 gap-1 rounded-2xl bg-black/20 backdrop-blur-[1px] border border-white/10 overflow-hidden">
                 {liveColors.map((color, i) => (
                   <div 
                     key={i} 
                     className={clsx(
-                      "w-full h-full rounded-md border-2 pointer-events-auto transition-colors duration-200",
-                      i === 4 ? "border-white/80" : "border-white/30 cursor-pointer active:scale-95 hover:border-white/60",
-                      COLOR_BG[color]
+                      "w-full h-full border-white/10 pointer-events-auto transition-all duration-300",
+                      i === 4 ? "border-2 z-10" : "border-[0.5px] cursor-pointer hover:bg-white/5",
+                      COLOR_BG[color],
+                      scanPhase === 'scanning' ? "opacity-40" : "opacity-90"
                     )}
                     onClick={() => handleManualColorCycle(i)}
                   >
-                    {i === 4 && (
-                      <div className="w-full h-full flex items-center justify-center opacity-80 mix-blend-difference text-white">
-                        <Check className="w-6 h-6" />
-                      </div>
-                    )}
+                      {i === 4 && (
+                        <div className="w-full h-full flex items-center justify-center opacity-100 mix-blend-difference text-white">
+                          <Check className="w-5 h-5 stroke-[3]" />
+                        </div>
+                      )}
                   </div>
                 ))}
               </div>
             </div>
-            
-            {/* Guide overlay texts */}
-            {scanPhase === 'scanning' ? (
-              <>
-                {isAutoCapture && (
-                  <div className="absolute top-6 left-0 right-0 text-center font-bold px-4">
-                    <span className="bg-black/60 backdrop-blur text-white px-4 py-2 rounded-full shadow-lg">
-                      Hold still to auto-capture...
-                    </span>
-                  </div>
-                )}
-                <div className="absolute bottom-6 left-0 right-0 text-center text-white/70 text-sm font-medium px-4">
-                  Align cube face with the grid.
-                </div>
-              </>
-            ) : (
-              <div className="absolute top-6 left-0 right-0 text-center font-bold px-4">
-                <span className="bg-blue-600/90 backdrop-blur text-white px-4 py-2 rounded-full shadow-lg">
-                  Review: Tap squares to fix colors
-                </span>
-              </div>
-            )}
           </div>
         )}
       </div>
 
       {/* Footer Controls */}
-      <div className="w-full p-8 pb-12 flex flex-col items-center gap-4 bg-gradient-to-t from-black via-black/80 to-transparent">
-        <div className="text-center mb-2">
-          {currentFaceIndex === 0 && <p className="text-blue-300 font-bold mb-1">Look at the U (White) Face.</p>}
-          {currentFaceIndex === 1 && <p className="text-orange-300 font-bold mb-1">Rotate cube RIGHT to show R (Red) Face.</p>}
-          {currentFaceIndex === 2 && <p className="text-green-300 font-bold mb-1">Rotate cube LEFT to show F (Green) Face.</p>}
-          {currentFaceIndex === 3 && <p className="text-yellow-300 font-bold mb-1">Rotate cube DOWN to show D (Yellow) Face.</p>}
-          {currentFaceIndex === 4 && <p className="text-red-300 font-bold mb-1">Rotate cube RIGHT to show L (Orange) Face.</p>}
-          {currentFaceIndex === 5 && <p className="text-blue-500 font-bold mb-1">Rotate cube RIGHT to show B (Blue) Face.</p>}
+      <div className="w-full p-6 pb-[env(safe-area-inset-bottom,24px)] flex flex-col items-center gap-6 bg-gradient-to-t from-black via-black/90 to-black/90">
+        <div className="text-center w-full max-w-[320px]">
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 mb-2 shadow-xl">
+             {currentFaceIndex === 0 && <p className="text-blue-400 font-black text-sm uppercase tracking-wider mb-1">Face: WHITE CENTER</p>}
+             {currentFaceIndex === 0 && <p className="text-white/60 text-xs font-medium">Position cube with white center in the middle.</p>}
+             
+             {currentFaceIndex === 1 && <p className="text-red-400 font-black text-sm uppercase tracking-wider mb-1">Face: RED CENTER</p>}
+             {currentFaceIndex === 1 && <p className="text-white/60 text-xs font-medium">Rotate cube RIGHT for the red face.</p>}
+             
+             {currentFaceIndex === 2 && <p className="text-green-400 font-black text-sm uppercase tracking-wider mb-1">Face: GREEN CENTER</p>}
+             {currentFaceIndex === 2 && <p className="text-white/60 text-xs font-medium">Rotate cube LEFT for the green face.</p>}
+             
+             {currentFaceIndex === 3 && <p className="text-yellow-400 font-black text-sm uppercase tracking-wider mb-1">Face: YELLOW CENTER</p>}
+             {currentFaceIndex === 3 && <p className="text-white/60 text-xs font-medium">Rotate cube DOWN for the yellow face.</p>}
+             
+             {currentFaceIndex === 4 && <p className="text-orange-400 font-black text-sm uppercase tracking-wider mb-1">Face: ORANGE CENTER</p>}
+             {currentFaceIndex === 4 && <p className="text-white/60 text-xs font-medium">Rotate cube RIGHT twice for orange.</p>}
+             
+             {currentFaceIndex === 5 && <p className="text-blue-500 font-black text-sm uppercase tracking-wider mb-1">Face: BLUE CENTER</p>}
+             {currentFaceIndex === 5 && <p className="text-white/60 text-xs font-medium">Rotate cube RIGHT for the final blue face.</p>}
+          </div>
         </div>
 
         {scanPhase === 'review' ? (
-          <div className="flex gap-4 w-full max-w-sm">
+          <div className="flex gap-3 w-full max-w-[360px]">
             <button
               onClick={handleRetake}
-              className="flex-1 py-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-2xl transition-colors"
+              className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all border border-white/10 active:scale-95 shadow-lg"
             >
               Retake
             </button>
             <button
               onClick={handleConfirm}
-              className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2"
             >
-              <Check className="w-5 h-5" /> Confirm
+              Confirm Face
             </button>
           </div>
         ) : (
@@ -499,27 +475,26 @@ export default function CameraScanner({ onScanComplete, onCancel, initialState }
             <button
               disabled={!!error}
               onClick={handleCapture}
-              className="relative w-20 h-20 rounded-full bg-white border-4 border-slate-300 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:hover:scale-100"
-              title="Manual Capture"
+              className="group relative w-20 h-20 rounded-full bg-white flex items-center justify-center hover:scale-105 active:scale-90 transition-all disabled:opacity-30 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
             >
               {/* Progress Ring for Auto Capture */}
               {isAutoCapture && (
-                <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+                <svg className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] -rotate-90 pointer-events-none" viewBox="0 0 100 100">
                   <circle
                     cx="50"
                     cy="50"
                     r="46"
                     fill="none"
-                    stroke="rgba(59, 130, 246, 0.5)" // blue-500 with opacity
-                    strokeWidth="8"
+                    stroke="rgba(255,255,255,0.1)"
+                    strokeWidth="4"
                   />
                   <circle
                     cx="50"
                     cy="50"
                     r="46"
                     fill="none"
-                    stroke="#3b82f6" // blue-500
-                    strokeWidth="8"
+                    stroke="#3b82f6"
+                    strokeWidth="4"
                     strokeLinecap="round"
                     strokeDasharray="289"
                     strokeDashoffset={289 - (289 * stableProgress) / 100}
@@ -527,32 +502,32 @@ export default function CameraScanner({ onScanComplete, onCancel, initialState }
                   />
                 </svg>
               )}
-              <Camera className="w-8 h-8 text-slate-800" />
+              <div className="absolute inset-1 rounded-full border-2 border-black/5" />
+              <Camera className="w-8 h-8 text-black group-hover:scale-110 transition-transform" />
             </button>
 
-            <label className="flex items-center cursor-pointer bg-white/10 px-4 py-2 rounded-full">
-              <span className="mr-3 text-white text-sm font-medium">Auto-Capture</span>
-              <div className="relative">
-                <input 
-                  type="checkbox" 
-                  className="sr-only" 
-                  checked={isAutoCapture} 
-                  onChange={() => setIsAutoCapture(!isAutoCapture)} 
-                />
-                <div className={clsx("block w-10 h-6 rounded-full transition-colors", isAutoCapture ? "bg-blue-500" : "bg-slate-600")}></div>
-                <div className={clsx("dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform", isAutoCapture && "transform translate-x-4")}></div>
-              </div>
-            </label>
+            <button 
+              onClick={() => setIsAutoCapture(!isAutoCapture)}
+              className={clsx(
+                "flex items-center gap-2 px-6 py-2 rounded-full border transition-all active:scale-95 shadow-lg",
+                isAutoCapture ? "bg-blue-600/20 border-blue-500/50 text-blue-400" : "bg-white/5 border-white/10 text-white/40"
+              )}
+            >
+              <div className={clsx("w-2 h-2 rounded-full animate-pulse", isAutoCapture ? "bg-blue-400" : "bg-white/20")} />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Auto-Capture {isAutoCapture ? 'ON' : 'OFF'}</span>
+            </button>
           </div>
         )}
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-2">
           {FACES.map((f, i) => (
             <div 
               key={f}
               className={clsx(
-                "w-3 h-3 rounded-full transition-colors",
-                i < currentFaceIndex ? "bg-green-500" : i === currentFaceIndex ? "bg-white" : "bg-white/30"
+                "h-1.5 transition-all duration-500 rounded-full",
+                i < currentFaceIndex ? "bg-blue-500 w-4 shadow-[0_0_8px_rgba(59,130,246,0.6)]" : 
+                i === currentFaceIndex ? "bg-white w-8 shadow-[0_0_12px_rgba(255,255,255,0.8)]" : 
+                "bg-white/10 w-2"
               )}
             />
           ))}
