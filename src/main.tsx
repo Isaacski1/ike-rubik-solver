@@ -1,16 +1,18 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
 import App from './App.tsx';
 import './index.css';
 
-// Unregister any existing service workers to ensure the latest version is loaded
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const registration of registrations) {
-      registration.unregister();
-    }
-  });
-}
+// Register service worker for PWA support
+const updateSW = registerSW({
+  onNeedRefresh() {
+    // Optionally alert user to refresh
+  },
+  onOfflineReady() {
+    // App is ready to work offline
+  },
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

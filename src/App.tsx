@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import SolverWorker from './solver.worker?worker';
 import CameraScanner from './components/CameraScanner';
 import GalaxyBackground from './components/GalaxyBackground';
+import SplashScreen from './components/SplashScreen';
 
 const FACES = ['U', 'R', 'F', 'D', 'L', 'B'];
 const CENTERS = [4, 13, 22, 31, 40, 49];
@@ -130,6 +131,7 @@ export default function App() {
   const [isAutoPlaying, setIsAutoPlaying] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
+  const [showSplash, setShowSplash] = useState<boolean>(true);
   const [lastMoveTime, setLastMoveTime] = useState<number>(0);
   const workerRef = useRef<Worker | null>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -312,9 +314,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-500 flex flex-col items-center py-8 px-4 font-sans text-slate-100">
-      
-      <GalaxyBackground />
+    <>
+      <AnimatePresence>
+        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      </AnimatePresence>
+
+      <div className="min-h-screen transition-colors duration-500 flex flex-col items-center py-8 px-4 font-sans text-slate-100">
+        
+        <GalaxyBackground />
 
       {/* Hidden audio element for background music */}
       <audio ref={bgMusicRef} onEnded={handleSongEnd} className="hidden" preload="auto" />
@@ -556,6 +563,7 @@ export default function App() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
